@@ -9,6 +9,10 @@
 	<script src="https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js"></script>
 
 	<style>
+		/* =========================================================
+		   Global design tokens & specimen layout config
+		   ↓ ここをいじればレイアウト系の調整が一括でできます
+		========================================================= */
 		:root {
 			--bg: #f3f3f3;
 			--paper: #ffffff;
@@ -16,7 +20,23 @@
 			--muted: #666666;
 			--accent: #e53935;
 			--rule: #dddddd;
-			--mono: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+			--mono: "SF Mono", ui-monospace, Menlo, Monaco, Consolas,
+				"Liberation Mono", "Courier New", monospace;
+
+			/* === 共通：テキストカラム幅 === */
+			--specimen-max-width: 40rem;
+
+			/* === Word / sentence / paragraph layout === */
+			--hierarchy-align: center;   /* flex-start / center / flex-end */
+			--hierarchy-label-gap: 12px;     /* caption ↔ text spacing */
+			--hierarchy-block-gap: 60px;     /* vertical gap between each block */
+
+			--hierarchy-word-size: 72px;     /* Word – large size */
+			--hierarchy-sentence-size: 26px; /* Short sentence size */
+			--hierarchy-paragraph-size: 14px;/* Paragraph size */
+
+			/* === Gyro / Hello Typeface! === */
+			--gyro-font-size: 48px;
 		}
 
 		*,
@@ -25,7 +45,8 @@
 			box-sizing: border-box;
 		}
 
-		html, body {
+		html,
+		body {
 			margin: 0;
 			padding: 0;
 		}
@@ -33,7 +54,8 @@
 		body {
 			background: var(--bg);
 			color: var(--ink);
-			font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+			font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+				"Helvetica Neue", Arial, sans-serif;
 			padding: 24px;
 		}
 
@@ -159,7 +181,7 @@
 			margin-top: 24px;
 			border-radius: 0;
 			border: 1px solid #d9d9d9;
-			box-shadow: 0 8px 20px rgba(0,0,0,0.03);
+			box-shadow: 0 8px 20px rgba(0, 0, 0, 0.03);
 		}
 
 		.specimen-header {
@@ -312,7 +334,7 @@
 			background: var(--accent);
 		}
 
-		/* === Editable main sample === */
+		/* === Sections & specimen === */
 
 		.section-label {
 			font-family: var(--mono);
@@ -321,47 +343,60 @@
 			letter-spacing: 0.16em;
 			color: var(--muted);
 			margin-bottom: 4px;
-			margin-top: 14px;
+			margin-top: 40px;
+			text-align: var(--hierarchy-align);
+			justify-content: var(--hierarchy-align);
 		}
 
 		.section-rule {
 			border: none;
 			border-top: 1px solid var(--ink);
 			margin: 14px 0 12px;
+			text-align: var(--hierarchy-align);
+			justify-content: var(--hierarchy-align);
 		}
 
 		.sample-text {
-			border: 1px solid var(--rule);
-			border-radius: 0;
-			padding: 12px;
-			background: #fafafa;
+			border: none;
+			/* border: 1px solid var(--rule); */
+			/*border-radius: 0; */
+			padding: 50px;
+			background: #ffffff;
 			min-height: 4em;
 			overflow-x: auto;
 			white-space: pre-wrap;
 			word-break: break-word;
 			cursor: text;
+			max-width: var(--specimen-max-width);
+			margin: 0 auto;
+			text-align: var(--hierarchy-align);
+			justify-content: var(--hierarchy-align);
 		}
 
 		.sample-text[contenteditable="true"] {
 			outline: none;
+			text-align: var(--hierarchy-align);
+			justify-content: var(--hierarchy-align);
 		}
 
 		.sample-caption {
 			font-size: 10px;
 			color: var(--muted);
 			margin-top: 4px;
+			text-align: var(--hierarchy-align);
+			justify-content: var(--hierarchy-align);
 		}
 
 		/* === Gyro-like section: Hello Typeface! === */
 
 		.gyro-box {
-			/* 枠線 & 背景を削除 */
 			border: none;
 			background: transparent;
 			padding: 16px 0;
 			position: relative;
 			overflow: hidden;
 			cursor: pointer;
+			
 		}
 
 		.gyro-box::before {
@@ -380,16 +415,20 @@
 			min-height: 2.4em;
 			display: flex;
 			align-items: center;
-			justify-content: center; /* 中央揃え */
 			cursor: text;
-			text-align: center;
 			width: 100%;
+			max-width: var(--specimen-max-width);
+			margin: 0 auto;
+			text-align: var(--hierarchy-align);
+			justify-content: var(--hierarchy-align);
 		}
 
 		.gyro-caption {
 			font-size: 10px;
 			color: var(--muted);
-			margin-top: 4px;
+			margin-top: 20px;
+			text-align: var(--hierarchy-align);
+			justify-content: var(--hierarchy-align);
 		}
 
 		/* === Fixed hierarchy specimens === */
@@ -397,39 +436,54 @@
 		.hierarchy-grid {
 			display: grid;
 			grid-template-columns: minmax(0, 1fr);
-			row-gap: 10px;
-		}
-
-		@media (min-width: 800px) {
-			.hierarchy-grid {
-				grid-template-columns: repeat(3, minmax(0, 1fr));
-				column-gap: 20px;
-			}
+			row-gap: var(--hierarchy-block-gap);
 		}
 
 		.block-specimen {
-			/* 枠線 & 背景を削除 */
 			border: none;
 			padding: 4px 0 0;
 			background: transparent;
 			min-height: 0;
 			display: flex;
 			align-items: flex-end;
+			text-align: var(--hierarchy-align);
+			justify-content: var(--hierarchy-align);
 		}
 
-		.word-specimen {
-			font-size: 72px; /* もっとデカく */
+		.block-content {
+			max-width: var(--specimen-max-width);
+			margin: 0 auto;
+			width: 100%;
+			text-align: var(--hierarchy-align);
+			justify-content: var(--hierarchy-align);
+		}
+
+		.block-content[contenteditable="true"] {
+			outline: none;
+			cursor: text;
+			text-align: var(--hierarchy-align);
+			justify-content: var(--hierarchy-align);
+		}
+
+		.block-content.word-specimen {
+			font-size: var(--hierarchy-word-size);
 			line-height: 1;
+			text-align: var(--hierarchy-align);
+			justify-content: var(--hierarchy-align);
 		}
 
-		.sentence-specimen {
-			font-size: 26px;
+		.block-content.sentence-specimen {
+			font-size: var(--hierarchy-sentence-size);
 			line-height: 1.2;
+			text-align: var(--hierarchy-align);
+			justify-content: var(--hierarchy-align);
 		}
 
-		.paragraph-specimen {
-			font-size: 14px;
+		.block-content.paragraph-specimen {
+			font-size: var(--hierarchy-paragraph-size);
 			line-height: 1.4;
+			text-align: var(--hierarchy-align);
+			justify-content: var(--hierarchy-align);
 		}
 
 		.block-label {
@@ -438,7 +492,9 @@
 			text-transform: uppercase;
 			letter-spacing: 0.16em;
 			color: var(--muted);
-			margin-bottom: 4px;
+			margin-bottom: var(--hierarchy-label-gap);
+			text-align: var(--hierarchy-align);
+			justify-content: var(--hierarchy-align);
 		}
 	</style>
 </head>
@@ -478,6 +534,31 @@
 	</div>
 
 	<script>
+		/* =========================================================
+		   Specimen text config
+		   ↓ ここをいじればテキスト内容を一括で変更できます
+		========================================================= */
+		const SPECIMEN_TEXTS = {
+			editableSample: [
+				"ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+				"abcdefghijklmnopqrstuvwxyz",
+				"0123456789",
+				".,:;!?*#/•(){}[]-–“”‘’$&"
+			].join("\n"),
+
+			gyroInitial: "Hello Typeface!",
+
+			hierarchy: {
+				wordLabel: "Word – large",
+				wordText: "TYPOGRAPHY",
+				sentenceLabel: "Short sentence – medium",
+				sentenceText: "Grid line, Gridline, and Gridlines redirect here. For paper with gridlines, see Graph paper. For the coordinate system, see Grid reference system.",
+				paragraphLabel: "Long text – small",
+				paragraphText:
+					"In graphic design, a grid is a structure (usually two-dimensional) made up of a series of intersecting straight (vertical, horizontal, and angular) or curved lines (grid lines) used to structure content. The grid serves as an armature or framework on which a designer can organize graphic elements (images, glyphs, paragraphs, etc.) in a rational, easy-to-absorb manner. A grid can be used to organize graphic elements in relation to a page, in relation to other graphic elements on the page, or relation to other parts of the same graphic element or shape. The less-common printing term “reference grid,” is an unrelated system with roots in the early days of printing."
+			}
+		};
+
 		// ---------- Utility functions ----------
 
 		function describeWeightClass(weight) {
@@ -513,7 +594,8 @@
 
 		function makeCssFamilyName(font, fileName, uniqSuffix) {
 			var fullName = getNameRecord(font.names, "fullName");
-			var family = fullName || getNameRecord(font.names, "fontFamily") || fileName;
+			var family =
+				fullName || getNameRecord(font.names, "fontFamily") || fileName;
 			family = family.replace(/["']/g, "");
 			if (uniqSuffix) {
 				family += "_" + uniqSuffix;
@@ -585,8 +667,15 @@
 					return;
 				}
 
-				var uniqId = Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
-				var cssFamilyName = makeCssFamilyName(font, file.name.replace(/\.[^.]+$/, ""), uniqId);
+				var uniqId =
+					Date.now().toString(36) +
+					"_" +
+					Math.random().toString(36).slice(2, 7);
+				var cssFamilyName = makeCssFamilyName(
+					font,
+					file.name.replace(/\.[^.]+$/, ""),
+					uniqId
+				);
 
 				var fontFace = new FontFace(cssFamilyName, arrayBuffer);
 				fontFace
@@ -646,16 +735,28 @@
 			}
 
 			metaBadges.appendChild(
-				makeBadge("Family", getNameRecord(font.names, "fontFamily") || "—")
+				makeBadge(
+					"Family",
+					getNameRecord(font.names, "fontFamily") || "—"
+				)
 			);
 			metaBadges.appendChild(
-				makeBadge("Style", getNameRecord(font.names, "fontSubfamily") || "—")
+				makeBadge(
+					"Style",
+					getNameRecord(font.names, "fontSubfamily") || "—"
+				)
 			);
 			metaBadges.appendChild(
-				makeBadge("Weight", describeWeightClass(weightClass || "—"))
+				makeBadge(
+					"Weight",
+					describeWeightClass(weightClass || "—")
+				)
 			);
 			metaBadges.appendChild(
-				makeBadge("Glyphs", font.numGlyphs != null ? String(font.numGlyphs) : "—")
+				makeBadge(
+					"Glyphs",
+					font.numGlyphs != null ? String(font.numGlyphs) : "—"
+				)
 			);
 
 			header.appendChild(title);
@@ -684,15 +785,32 @@
 			addRow("Family", getNameRecord(font.names, "fontFamily"));
 			addRow("Subfamily", getNameRecord(font.names, "fontSubfamily"));
 			addRow("Version", getNameRecord(font.names, "version"));
-			addRow("Weight class (OS/2)", weightClass != null ? String(weightClass) : "");
-			addRow("Width class (OS/2)", widthClass != null ? String(widthClass) : "");
+			addRow(
+				"Weight class (OS/2)",
+				weightClass != null ? String(weightClass) : ""
+			);
+			addRow(
+				"Width class (OS/2)",
+				widthClass != null ? String(widthClass) : ""
+			);
 			addRow(
 				"fsSelection",
-				fsSel != null ? String(fsSel) + (fsDesc ? " (" + fsDesc + ")" : "") : ""
+				fsSel != null
+					? String(fsSel) + (fsDesc ? " (" + fsDesc + ")" : "")
+					: ""
 			);
-			addRow("Units per em", font.unitsPerEm != null ? String(font.unitsPerEm) : "");
-			addRow("Ascender", font.ascender != null ? String(font.ascender) : "");
-			addRow("Descender", font.descender != null ? String(font.descender) : "");
+			addRow(
+				"Units per em",
+				font.unitsPerEm != null ? String(font.unitsPerEm) : ""
+			);
+			addRow(
+				"Ascender",
+				font.ascender != null ? String(font.ascender) : ""
+			);
+			addRow(
+				"Descender",
+				font.descender != null ? String(font.descender) : ""
+			);
 
 			wrapper.appendChild(table);
 
@@ -726,14 +844,14 @@
 
 			// Variable axes
 			var fvar = font.tables && font.tables.fvar;
-			var axisStates = [];      // for Editable specimen
-			var gyroAxesMeta = [];    // for Hello Typeface! (pointer / tilt)
+			var axisStates = [];   // for Editable specimen
+			var gyroAxesMeta = []; // for Hello Typeface! pointer / tilt
 			var axisControlsWrap = document.createElement("div");
 			axisControlsWrap.className = "axis-controls";
 
 			if (fvar && Array.isArray(fvar.axes) && fvar.axes.length) {
 				fvar.axes.forEach(function (axis) {
-					// for Editable specimen
+					// for editable specimen
 					var state = {
 						tag: axis.tag,
 						min: axis.minValue,
@@ -742,7 +860,7 @@
 					};
 					axisStates.push(state);
 
-					// for gyro interaction (meta only)
+					// for gyro interaction meta
 					gyroAxesMeta.push({
 						tag: axis.tag,
 						min: axis.minValue,
@@ -821,14 +939,12 @@
 			var sample = document.createElement("div");
 			sample.className = "sample-text";
 			sample.setAttribute("contenteditable", "true");
-			sample.textContent =
-				"The quick brown fox jumps over the lazy dog. 0123456789\n" +
-				"Pack my box with five dozen liquor jugs.\n" +
-				"Grids, rhythm and contrast shape clear typography.";
+			sample.textContent = SPECIMEN_TEXTS.editableSample;
 
 			var caption = document.createElement("div");
 			caption.className = "sample-caption";
-			caption.textContent = "Click and edit this text to test the typeface.";
+			caption.textContent =
+				"Click and edit this text to test the typeface.";
 
 			wrapper.appendChild(sectionLabelMain);
 			wrapper.appendChild(sample);
@@ -851,7 +967,7 @@
 			var gyroText = document.createElement("div");
 			gyroText.className = "gyro-text";
 			gyroText.setAttribute("contenteditable", "true");
-			gyroText.textContent = "Hello Typeface!";
+			gyroText.textContent = SPECIMEN_TEXTS.gyroInitial;
 
 			gyroBox.appendChild(gyroText);
 			wrapper.appendChild(gyroBox);
@@ -880,10 +996,14 @@
 			var wordContainer = document.createElement("div");
 			var wordLabel = document.createElement("div");
 			wordLabel.className = "block-label";
-			wordLabel.textContent = "Word – large";
+			wordLabel.textContent = SPECIMEN_TEXTS.hierarchy.wordLabel;
 			var wordBlock = document.createElement("div");
-			wordBlock.className = "block-specimen word-specimen";
-			wordBlock.textContent = "Typography"; // より長くて大きい単語に変更
+			wordBlock.className = "block-specimen";
+			var wordContent = document.createElement("div");
+			wordContent.className = "block-content word-specimen";
+			wordContent.textContent = SPECIMEN_TEXTS.hierarchy.wordText;
+			wordContent.setAttribute("contenteditable", "true");
+			wordBlock.appendChild(wordContent);
 			wordContainer.appendChild(wordLabel);
 			wordContainer.appendChild(wordBlock);
 
@@ -891,10 +1011,16 @@
 			var sentenceContainer = document.createElement("div");
 			var sentenceLabel = document.createElement("div");
 			sentenceLabel.className = "block-label";
-			sentenceLabel.textContent = "Short sentence – medium";
+			sentenceLabel.textContent =
+				SPECIMEN_TEXTS.hierarchy.sentenceLabel;
 			var sentenceBlock = document.createElement("div");
-			sentenceBlock.className = "block-specimen sentence-specimen";
-			sentenceBlock.textContent = "Grids reveal structure and rhythm in the layout.";
+			sentenceBlock.className = "block-specimen";
+			var sentenceContent = document.createElement("div");
+			sentenceContent.className = "block-content sentence-specimen";
+			sentenceContent.textContent =
+				SPECIMEN_TEXTS.hierarchy.sentenceText;
+			sentenceContent.setAttribute("contenteditable", "true");
+			sentenceBlock.appendChild(sentenceContent);
 			sentenceContainer.appendChild(sentenceLabel);
 			sentenceContainer.appendChild(sentenceBlock);
 
@@ -902,12 +1028,17 @@
 			var paragraphContainer = document.createElement("div");
 			var paragraphLabel = document.createElement("div");
 			paragraphLabel.className = "block-label";
-			paragraphLabel.textContent = "Long text – small";
+			paragraphLabel.textContent =
+				SPECIMEN_TEXTS.hierarchy.paragraphLabel;
 			var paragraphBlock = document.createElement("div");
-			paragraphBlock.className = "block-specimen paragraph-specimen";
-			paragraphBlock.textContent =
-				"Good typography balances hierarchy, contrast and spacing. " +
-				"Consistent grids allow content to breathe while keeping information precise and readable.";
+			paragraphBlock.className = "block-specimen";
+			var paragraphContent = document.createElement("div");
+			paragraphContent.className =
+				"block-content paragraph-specimen";
+			paragraphContent.textContent =
+				SPECIMEN_TEXTS.hierarchy.paragraphText;
+			paragraphContent.setAttribute("contenteditable", "true");
+			paragraphBlock.appendChild(paragraphContent);
 			paragraphContainer.appendChild(paragraphLabel);
 			paragraphContainer.appendChild(paragraphBlock);
 
@@ -929,7 +1060,8 @@
 					variationSettings = buildVariationSettings(axisStates);
 				}
 
-				sample.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
+				sample.style.fontFamily =
+					'"' + cssFamilyName + '", system-ui, sans-serif';
 				sample.style.fontSize = baseSize + "px";
 				sample.style.fontVariationSettings = variationSettings;
 			}
@@ -937,25 +1069,29 @@
 			sizeSlider.addEventListener("input", updateEditableSpecimen);
 			updateEditableSpecimen();
 
-			// Other specimens: fixed sizes / default variation (スライダーの影響は受けない)
-			gyroText.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
-			gyroText.style.fontSize = "48px";
+			// Other specimens: fixed sizes / default variation
+			gyroText.style.fontFamily =
+				'"' + cssFamilyName + '", system-ui, sans-serif';
+			gyroText.style.fontSize = "var(--gyro-font-size)";
 
-			wordBlock.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
-			sentenceBlock.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
-			paragraphBlock.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
+			wordContent.style.fontFamily =
+				'"' + cssFamilyName + '", system-ui, sans-serif';
+			sentenceContent.style.fontFamily =
+				'"' + cssFamilyName + '", system-ui, sans-serif';
+			paragraphContent.style.fontFamily =
+				'"' + cssFamilyName + '", system-ui, sans-serif';
 
 			if (axisStates.length) {
 				var baseSettings = buildVariationSettings(axisStates);
 				gyroText.style.fontVariationSettings = baseSettings;
-				wordBlock.style.fontVariationSettings = baseSettings;
-				sentenceBlock.style.fontVariationSettings = baseSettings;
-				paragraphBlock.style.fontVariationSettings = baseSettings;
+				wordContent.style.fontVariationSettings = baseSettings;
+				sentenceContent.style.fontVariationSettings = baseSettings;
+				paragraphContent.style.fontVariationSettings = baseSettings;
 			} else {
 				gyroText.style.fontVariationSettings = "normal";
-				wordBlock.style.fontVariationSettings = "normal";
-				sentenceBlock.style.fontVariationSettings = "normal";
-				paragraphBlock.style.fontVariationSettings = "normal";
+				wordContent.style.fontVariationSettings = "normal";
+				sentenceContent.style.fontVariationSettings = "normal";
+				paragraphContent.style.fontVariationSettings = "normal";
 			}
 
 			// ---------- Gyro-like interaction ----------
@@ -963,31 +1099,45 @@
 			function applyVariableToGyroFromPointer(xRatio, yRatio) {
 				if (!gyroAxesMeta.length) return;
 
-				var settings = gyroAxesMeta.map(function (axisMeta, index) {
-					var t = (index % 2 === 0) ? xRatio : yRatio;
-					var value = axisMeta.min + (axisMeta.max - axisMeta.min) * t;
-					return "'" + axisMeta.tag + "' " + value.toFixed(1);
-				}).join(", ");
+				var settings = gyroAxesMeta
+					.map(function (axisMeta, index) {
+						var t = index % 2 === 0 ? xRatio : yRatio;
+						var value =
+							axisMeta.min +
+							(axisMeta.max - axisMeta.min) * t;
+						return (
+							"'" + axisMeta.tag + "' " + value.toFixed(1)
+						);
+					})
+					.join(", ");
 
 				gyroText.style.fontVariationSettings = settings;
 			}
 
 			function applyStaticToGyroFromPointer(xRatio, yRatio) {
-				// x: weight, y: tracking & slight shear
 				var weight = 100 + Math.round(xRatio * 800);
 				var letterSpacing = -0.04 + yRatio * 0.18; // em
 				var rotate = (xRatio - 0.5) * 4; // degrees
 
 				gyroText.style.fontWeight = weight;
-				gyroText.style.letterSpacing = letterSpacing.toFixed(3) + "em";
-				gyroText.style.transform = "skewX(" + rotate.toFixed(2) + "deg)";
+				gyroText.style.letterSpacing =
+					letterSpacing.toFixed(3) + "em";
+				gyroText.style.transform =
+					"skewX(" + rotate.toFixed(2) + "deg)";
 			}
 
 			function resetGyroVisual() {
 				if (gyroAxesMeta.length) {
-					var settings = gyroAxesMeta.map(function (axisMeta) {
-						return "'" + axisMeta.tag + "' " + axisMeta.defaultValue.toFixed(1);
-					}).join(", ");
+					var settings = gyroAxesMeta
+						.map(function (axisMeta) {
+							return (
+								"'" +
+								axisMeta.tag +
+								"' " +
+								axisMeta.defaultValue.toFixed(1)
+							);
+						})
+						.join(", ");
 					gyroText.style.fontVariationSettings = settings;
 					gyroText.style.transform = "none";
 					gyroText.style.letterSpacing = "0em";
@@ -1014,11 +1164,12 @@
 				resetGyroVisual();
 			});
 
-			// Optional: device tilt support
 			if (window.DeviceOrientationEvent) {
-				window.addEventListener("deviceorientation", function (event) {
+				window.addEventListener("deviceorientation", function (
+					event
+				) {
 					var gamma = event.gamma || 0; // -90 to 90
-					var beta = event.beta || 0;   // -180 to 180
+					var beta = event.beta || 0; // -180 to 180
 
 					var xRatio = clamp01((gamma + 45) / 90);
 					var yRatio = clamp01((beta + 45) / 90);
