@@ -456,6 +456,9 @@
 			width: 100%;
 			text-align: var(--hierarchy-align);
 			justify-content: var(--hierarchy-align);
+			font-kerning: normal;                  /* CSS3 kerning property */
+			font-feature-settings: "kern" 1, "liga" 1, "clig" 1; /* 保険で kern/liga も明示 */
+			text-rendering: optimizeLegibility;    /* 一部ブラウザで文字組優先レンダリング */
 		}
 
 		.block-content[contenteditable="true"] {
@@ -546,13 +549,13 @@
 				".,:;!?*#/•(){}[]-–“”‘’$&"
 			].join("\n"),
 
-			gyroInitial: "Hello Typeface!",
+			gyroInitial: "Hamburgefonstiv",
 
 			hierarchy: {
 				wordLabel: "Word – large",
 				wordText: "TYPOGRAPHY",
 				sentenceLabel: "Short sentence – medium",
-				sentenceText: "Grid line, Gridline, and Gridlines redirect here. For paper with gridlines, see Graph paper. For the coordinate system, see Grid reference system.",
+				sentenceText: "The quick brown fox jumps over the lazy dog\nTHE QUICK BROWN FOX JUMPS OVER THE LAZY DOG",
 				paragraphLabel: "Long text – small",
 				paragraphText:
 					"In graphic design, a grid is a structure (usually two-dimensional) made up of a series of intersecting straight (vertical, horizontal, and angular) or curved lines (grid lines) used to structure content. The grid serves as an armature or framework on which a designer can organize graphic elements (images, glyphs, paragraphs, etc.) in a rational, easy-to-absorb manner. A grid can be used to organize graphic elements in relation to a page, in relation to other graphic elements on the page, or relation to other parts of the same graphic element or shape. The less-common printing term “reference grid,” is an unrelated system with roots in the early days of printing."
