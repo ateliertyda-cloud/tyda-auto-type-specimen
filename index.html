@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Type Specimen – Local Font Viewer</title>
+
+	<!-- opentype.js for font inspection -->
+	<script src="https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js"></script>
+
+	<style>
+		:root {
+			--bg: #f3f3f3;
+			--paper: #ffffff;
+			--ink: #111111;
+			--muted: #666666;
+			--accent: #e53935;
+			--rule: #dddddd;
+			--mono: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+		}
+
+		*,
+		*::before,
+		*::after {
+			box-sizing: border-box;
+		}
+
+		html, body {
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			background: var(--bg);
+			color: var(--ink);
+			font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+			padding: 24px;
+		}
+
+		.container {
+			max-width: 1200px;
+			margin: 0 auto;
+			display: grid;
+			grid-template-columns: minmax(0, 1fr);
+			row-gap: 24px;
+		}
+
+		@media (min-width: 900px) {
+			.container {
+				grid-template-columns: 260px minmax(0, 1fr);
+				column-gap: 40px;
+				align-items: flex-start;
+			}
+		}
+
+		/* === Left column: title / intro === */
+
+		header {
+			border-top: 8px solid var(--accent);
+			padding-top: 18px;
+		}
+
+		.site-title {
+			font-size: 24px;
+			text-transform: uppercase;
+			letter-spacing: 0.15em;
+			margin: 0 0 10px;
+		}
+
+		.site-subtitle {
+			font-size: 11px;
+			text-transform: uppercase;
+			letter-spacing: 0.18em;
+			color: var(--muted);
+			margin-bottom: 20px;
+		}
+
+		.lead {
+			font-size: 13px;
+			line-height: 1.5;
+			color: #222;
+			max-width: 36rem;
+			margin-bottom: 18px;
+		}
+
+		.lead strong {
+			font-weight: 600;
+		}
+
+		.meta-block {
+			border-top: 1px solid var(--rule);
+			padding-top: 10px;
+			margin-top: 10px;
+			font-size: 11px;
+			color: var(--muted);
+		}
+
+		.meta-label {
+			font-family: var(--mono);
+			text-transform: uppercase;
+			letter-spacing: 0.16em;
+			font-size: 10px;
+			margin-bottom: 6px;
+		}
+
+		/* === Dropzone === */
+
+		.dropzone {
+			border: 1px solid var(--ink);
+			border-radius: 0;
+			padding: 18px 16px 16px;
+			background: var(--paper);
+			text-align: left;
+			position: relative;
+			transition: background-color 0.15s ease, border-color 0.15s ease;
+		}
+
+		.dropzone::before {
+			content: "01";
+			position: absolute;
+			top: 10px;
+			right: 14px;
+			font-family: var(--mono);
+			font-size: 11px;
+			color: var(--muted);
+		}
+
+		.dropzone.dragover {
+			border-color: var(--accent);
+			background: #ffeceb;
+		}
+
+		.dropzone-label {
+			font-size: 12px;
+			text-transform: uppercase;
+			letter-spacing: 0.12em;
+			margin-bottom: 6px;
+		}
+
+		.dropzone-desc {
+			font-size: 11px;
+			color: var(--muted);
+			margin-bottom: 10px;
+		}
+
+		input[type="file"] {
+			font-size: 11px;
+		}
+
+		/* === Specimen cards === */
+
+		#specimenContainer {
+			grid-column: 1 / -1;
+		}
+
+		.specimen {
+			background: var(--paper);
+			padding: 18px 18px 22px;
+			margin-top: 24px;
+			border-radius: 0;
+			border: 1px solid #d9d9d9;
+			box-shadow: 0 8px 20px rgba(0,0,0,0.03);
+		}
+
+		.specimen-header {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: space-between;
+			gap: 6px 14px;
+			align-items: baseline;
+			margin-bottom: 10px;
+			border-bottom: 1px solid var(--rule);
+			padding-bottom: 6px;
+		}
+
+		.specimen-title {
+			font-size: 18px;
+			font-weight: 600;
+			letter-spacing: 0.04em;
+		}
+
+		.specimen-meta {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 4px 8px;
+			font-size: 10px;
+			color: var(--muted);
+			justify-content: flex-end;
+		}
+
+		.meta-badge {
+			border: 1px solid var(--rule);
+			padding: 2px 6px;
+			text-transform: uppercase;
+			letter-spacing: 0.1em;
+			font-family: var(--mono);
+			display: flex;
+			align-items: center;
+			gap: 4px;
+		}
+
+		.meta-badge strong {
+			font-weight: 600;
+		}
+
+		.meta-table {
+			width: 100%;
+			border-collapse: collapse;
+			font-size: 10px;
+			margin: 8px 0 14px;
+		}
+
+		.meta-table th,
+		.meta-table td {
+			border-bottom: 1px solid var(--rule);
+			padding: 3px 4px;
+			vertical-align: top;
+		}
+
+		.meta-table th {
+			text-align: left;
+			width: 110px;
+			text-transform: uppercase;
+			letter-spacing: 0.1em;
+			font-family: var(--mono);
+			color: var(--muted);
+		}
+
+		.meta-table td {
+			color: #222;
+		}
+
+		/* === Controls === */
+
+		.controls {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 16px 24px;
+			align-items: flex-start;
+			margin-bottom: 14px;
+			border-top: 1px solid var(--rule);
+			padding-top: 10px;
+		}
+
+		.control-group {
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+			min-width: 200px;
+		}
+
+		.control-label {
+			font-size: 10px;
+			text-transform: uppercase;
+			letter-spacing: 0.12em;
+			font-family: var(--mono);
+			color: var(--muted);
+		}
+
+		.control-value {
+			font-family: var(--mono);
+			font-size: 11px;
+		}
+
+		input[type="range"] {
+			width: 220px;
+		}
+
+		.axis-controls {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px 14px;
+		}
+
+		.axis-tag {
+			font-family: var(--mono);
+			font-size: 11px;
+			border: 1px solid var(--rule);
+			padding: 1px 6px;
+			text-transform: uppercase;
+			letter-spacing: 0.1em;
+		}
+
+		.axis-group {
+			display: flex;
+			flex-direction: column;
+			gap: 3px;
+		}
+
+		.axis-value {
+			font-family: var(--mono);
+			font-size: 11px;
+			color: var(--muted);
+		}
+
+		.chip {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+			padding: 2px 8px;
+			border: 1px solid var(--accent);
+			text-transform: uppercase;
+			letter-spacing: 0.12em;
+			font-size: 10px;
+			font-family: var(--mono);
+		}
+
+		.chip-dot {
+			width: 6px;
+			height: 6px;
+			border-radius: 999px;
+			background: var(--accent);
+		}
+
+		/* === Editable main sample === */
+
+		.section-label {
+			font-family: var(--mono);
+			font-size: 10px;
+			text-transform: uppercase;
+			letter-spacing: 0.16em;
+			color: var(--muted);
+			margin-bottom: 4px;
+			margin-top: 14px;
+		}
+
+		.section-rule {
+			border: none;
+			border-top: 1px solid var(--ink);
+			margin: 14px 0 12px;
+		}
+
+		.sample-text {
+			border: 1px solid var(--rule);
+			border-radius: 0;
+			padding: 12px;
+			background: #fafafa;
+			min-height: 4em;
+			overflow-x: auto;
+			white-space: pre-wrap;
+			word-break: break-word;
+			cursor: text;
+		}
+
+		.sample-text[contenteditable="true"] {
+			outline: none;
+		}
+
+		.sample-caption {
+			font-size: 10px;
+			color: var(--muted);
+			margin-top: 4px;
+		}
+
+		/* === Gyro-like section: Hello Typeface! === */
+
+		.gyro-box {
+			border: 1px solid var(--ink);
+			background: #f9f9f9;
+			padding: 16px 14px;
+			position: relative;
+			overflow: hidden;
+			cursor: pointer;
+		}
+
+		.gyro-box::before {
+			content: "02";
+			position: absolute;
+			top: 6px;
+			right: 10px;
+			font-family: var(--mono);
+			font-size: 11px;
+			color: var(--muted);
+		}
+
+		.gyro-text {
+			transition: transform 0.08s ease-out, letter-spacing 0.08s ease-out;
+			transform-origin: center center;
+			min-height: 2.4em;
+			display: flex;
+			align-items: center;
+			justify-content: flex-start;
+			cursor: text;
+		}
+
+		.gyro-caption {
+			font-size: 10px;
+			color: var(--muted);
+			margin-top: 4px;
+		}
+
+		/* === Fixed hierarchy specimens === */
+
+		.hierarchy-grid {
+			display: grid;
+			grid-template-columns: minmax(0, 1fr);
+			row-gap: 10px;
+		}
+
+		@media (min-width: 800px) {
+			.hierarchy-grid {
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				column-gap: 20px;
+			}
+		}
+
+		.block-specimen {
+			border: 1px solid var(--rule);
+			padding: 10px 10px 12px;
+			background: #fcfcfc;
+			min-height: 80px;
+			display: flex;
+			align-items: flex-end;
+		}
+
+		.word-specimen {
+			font-size: 44px;
+			line-height: 1;
+		}
+
+		.sentence-specimen {
+			font-size: 24px;
+			line-height: 1.2;
+		}
+
+		.paragraph-specimen {
+			font-size: 14px;
+			line-height: 1.4;
+		}
+
+		.block-label {
+			font-family: var(--mono);
+			font-size: 10px;
+			text-transform: uppercase;
+			letter-spacing: 0.16em;
+			color: var(--muted);
+			margin-bottom: 4px;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<header>
+			<h1 class="site-title">Type Specimen</h1>
+			<div class="site-subtitle">Local font viewer for designers</div>
+
+			<p class="lead">
+				Load any OpenType font from your own machine and inspect its name table,
+				OS/2 metrics and variable axes while setting live text directly on the page.
+				No files are uploaded – everything happens in your browser only.
+			</p>
+
+			<div class="meta-block">
+				<div class="meta-label">Instructions</div>
+				<ul style="margin: 0; padding-left: 1.1em; list-style: square; font-size: 11px;">
+					<li>Drop <strong>.otf / .ttf / .woff / .woff2</strong> files into the panel.</li>
+					<li>Edit the main sample to test paragraphs, headlines and symbols.</li>
+					<li>Move your pointer over <strong>Hello Typeface!</strong> to explore variable axes or weight changes.</li>
+				</ul>
+			</div>
+		</header>
+
+		<section>
+			<div id="dropzone" class="dropzone">
+				<div class="dropzone-label">Load local font files</div>
+				<div class="dropzone-desc">
+					Drop files here or use the file picker. Multiple files are allowed.
+				</div>
+				<input id="fileInput" type="file" accept=".otf,.ttf,.woff,.woff2" multiple />
+			</div>
+		</section>
+
+		<section id="specimenContainer"></section>
+	</div>
+
+	<script>
+		// ---------- Utility functions ----------
+
+		function describeWeightClass(weight) {
+			if (!weight) return "Unknown";
+			var w = parseInt(weight, 10);
+			if (w <= 150) return w + " (Thin)";
+			if (w <= 250) return w + " (Extra Light)";
+			if (w <= 350) return w + " (Light)";
+			if (w <= 450) return w + " (Regular)";
+			if (w <= 550) return w + " (Medium)";
+			if (w <= 650) return w + " (Semi Bold)";
+			if (w <= 750) return w + " (Bold)";
+			if (w <= 850) return w + " (Extra Bold)";
+			return w + " (Black)";
+		}
+
+		function describeFsSelection(fsSelection) {
+			if (typeof fsSelection !== "number") return "";
+			var flags = [];
+			if (fsSelection & (1 << 0)) flags.push("Italic");
+			if (fsSelection & (1 << 5)) flags.push("Bold");
+			if (fsSelection & (1 << 6)) flags.push("Regular");
+			if (fsSelection & (1 << 9)) flags.push("Oblique");
+			return flags.join(", ");
+		}
+
+		function getNameRecord(nameTable, key) {
+			if (!nameTable || !nameTable[key]) return "";
+			if (typeof nameTable[key].en === "string") return nameTable[key].en;
+			var firstKey = Object.keys(nameTable[key])[0];
+			return nameTable[key][firstKey] || "";
+		}
+
+		function makeCssFamilyName(font, fileName, uniqSuffix) {
+			var fullName = getNameRecord(font.names, "fullName");
+			var family = fullName || getNameRecord(font.names, "fontFamily") || fileName;
+			family = family.replace(/["']/g, "");
+			if (uniqSuffix) {
+				family += "_" + uniqSuffix;
+			}
+			return family;
+		}
+
+		function buildVariationSettings(axes) {
+			if (!axes || !axes.length) return "normal";
+			return axes
+				.map(function (axis) {
+					return "'" + axis.tag + "' " + axis.value;
+				})
+				.join(", ");
+		}
+
+		function clamp01(x) {
+			return Math.min(1, Math.max(0, x));
+		}
+
+		// ---------- Dropzone wiring ----------
+
+		var dropzone = document.getElementById("dropzone");
+		var fileInput = document.getElementById("fileInput");
+		var specimenContainer = document.getElementById("specimenContainer");
+
+		dropzone.addEventListener("dragover", function (event) {
+			event.preventDefault();
+			dropzone.classList.add("dragover");
+		});
+
+		dropzone.addEventListener("dragleave", function (event) {
+			event.preventDefault();
+			dropzone.classList.remove("dragover");
+		});
+
+		dropzone.addEventListener("drop", function (event) {
+			event.preventDefault();
+			dropzone.classList.remove("dragover");
+			var files = event.dataTransfer.files;
+			handleFiles(files);
+		});
+
+		fileInput.addEventListener("change", function (event) {
+			handleFiles(event.target.files);
+		});
+
+		function handleFiles(fileList) {
+			if (!fileList || !fileList.length) return;
+			for (var i = 0; i < fileList.length; i++) {
+				parseAndRenderFont(fileList[i]);
+			}
+		}
+
+		// ---------- Font parsing + specimen ----------
+
+		function parseAndRenderFont(file) {
+			var reader = new FileReader();
+
+			reader.onload = function (e) {
+				var arrayBuffer = e.target.result;
+				var font;
+
+				try {
+					font = opentype.parse(arrayBuffer);
+				} catch (err) {
+					alert('Failed to parse "' + file.name + '".');
+					console.error(err);
+					return;
+				}
+
+				var uniqId = Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
+				var cssFamilyName = makeCssFamilyName(font, file.name.replace(/\.[^.]+$/, ""), uniqId);
+
+				var fontFace = new FontFace(cssFamilyName, arrayBuffer);
+				fontFace
+					.load()
+					.then(function (loadedFace) {
+						document.fonts.add(loadedFace);
+						createSpecimenCard(font, cssFamilyName, file);
+					})
+					.catch(function (err) {
+						alert('Failed to load "' + file.name + '".');
+						console.error(err);
+					});
+			};
+
+			reader.onerror = function () {
+				alert('Failed to read "' + file.name + '".');
+			};
+
+			reader.readAsArrayBuffer(file);
+		}
+
+		function createSpecimenCard(font, cssFamilyName, file) {
+			var os2 = font.tables && font.tables.os2 ? font.tables.os2 : {};
+			var weightClass = os2.usWeightClass;
+			var widthClass = os2.usWidthClass;
+			var fsSel = os2.fsSelection;
+			var fsDesc = describeFsSelection(fsSel);
+
+			var wrapper = document.createElement("article");
+			wrapper.className = "specimen";
+
+			// ---------- Header ----------
+
+			var header = document.createElement("div");
+			header.className = "specimen-header";
+
+			var title = document.createElement("div");
+			title.className = "specimen-title";
+			title.textContent =
+				getNameRecord(font.names, "fullName") ||
+				getNameRecord(font.names, "fontFamily") ||
+				file.name;
+
+			var metaBadges = document.createElement("div");
+			metaBadges.className = "specimen-meta";
+
+			function makeBadge(label, value) {
+				var b = document.createElement("span");
+				b.className = "meta-badge";
+				var strong = document.createElement("strong");
+				strong.textContent = label;
+				b.appendChild(strong);
+				var span = document.createElement("span");
+				span.textContent = value || "—";
+				b.appendChild(span);
+				return b;
+			}
+
+			metaBadges.appendChild(
+				makeBadge("Family", getNameRecord(font.names, "fontFamily") || "—")
+			);
+			metaBadges.appendChild(
+				makeBadge("Style", getNameRecord(font.names, "fontSubfamily") || "—")
+			);
+			metaBadges.appendChild(
+				makeBadge("Weight", describeWeightClass(weightClass || "—"))
+			);
+			metaBadges.appendChild(
+				makeBadge("Glyphs", font.numGlyphs != null ? String(font.numGlyphs) : "—")
+			);
+
+			header.appendChild(title);
+			header.appendChild(metaBadges);
+			wrapper.appendChild(header);
+
+			// ---------- Detail table ----------
+
+			var table = document.createElement("table");
+			table.className = "meta-table";
+
+			function addRow(label, value) {
+				var tr = document.createElement("tr");
+				var th = document.createElement("th");
+				var td = document.createElement("td");
+				th.textContent = label;
+				td.textContent = value || "—";
+				tr.appendChild(th);
+				tr.appendChild(td);
+				table.appendChild(tr);
+			}
+
+			addRow("File name", file.name);
+			addRow("PostScript name", getNameRecord(font.names, "postScriptName"));
+			addRow("Full name", getNameRecord(font.names, "fullName"));
+			addRow("Family", getNameRecord(font.names, "fontFamily"));
+			addRow("Subfamily", getNameRecord(font.names, "fontSubfamily"));
+			addRow("Version", getNameRecord(font.names, "version"));
+			addRow("Weight class (OS/2)", weightClass != null ? String(weightClass) : "");
+			addRow("Width class (OS/2)", widthClass != null ? String(widthClass) : "");
+			addRow(
+				"fsSelection",
+				fsSel != null ? String(fsSel) + (fsDesc ? " (" + fsDesc + ")" : "") : ""
+			);
+			addRow("Units per em", font.unitsPerEm != null ? String(font.unitsPerEm) : "");
+			addRow("Ascender", font.ascender != null ? String(font.ascender) : "");
+			addRow("Descender", font.descender != null ? String(font.descender) : "");
+
+			wrapper.appendChild(table);
+
+			// ---------- Controls (size + variable axes) ----------
+
+			var controls = document.createElement("div");
+			controls.className = "controls";
+
+			// Font size
+			var sizeGroup = document.createElement("div");
+			sizeGroup.className = "control-group";
+
+			var sizeLabel = document.createElement("div");
+			sizeLabel.className = "control-label";
+			sizeLabel.textContent = "Font size";
+
+			var sizeSlider = document.createElement("input");
+			sizeSlider.type = "range";
+			sizeSlider.min = 12;
+			sizeSlider.max = 120;
+			sizeSlider.value = 40;
+			sizeSlider.step = 1;
+
+			var sizeValue = document.createElement("div");
+			sizeValue.className = "control-value";
+
+			sizeGroup.appendChild(sizeLabel);
+			sizeGroup.appendChild(sizeSlider);
+			sizeGroup.appendChild(sizeValue);
+			controls.appendChild(sizeGroup);
+
+			// Variable axes
+			var fvar = font.tables && font.tables.fvar;
+			var axisStates = [];
+			var axisControlsWrap = document.createElement("div");
+			axisControlsWrap.className = "axis-controls";
+
+			if (fvar && Array.isArray(fvar.axes) && fvar.axes.length) {
+				fvar.axes.forEach(function (axis) {
+					var state = {
+						tag: axis.tag,
+						min: axis.minValue,
+						max: axis.maxValue,
+						defaultValue: axis.defaultValue,
+						value: axis.defaultValue
+					};
+					axisStates.push(state);
+
+					var axisGroup = document.createElement("div");
+					axisGroup.className = "axis-group";
+
+					var labelRow = document.createElement("div");
+					labelRow.style.display = "flex";
+					labelRow.style.alignItems = "center";
+					labelRow.style.gap = "6px";
+
+					var tagSpan = document.createElement("span");
+					tagSpan.className = "axis-tag";
+					tagSpan.textContent = axis.tag;
+
+					var axisVal = document.createElement("span");
+					axisVal.className = "axis-value";
+
+					labelRow.appendChild(tagSpan);
+					labelRow.appendChild(axisVal);
+
+					var slider = document.createElement("input");
+					slider.type = "range";
+					slider.min = axis.minValue;
+					slider.max = axis.maxValue;
+					slider.step = 1;
+					slider.value = axis.defaultValue;
+
+					axisGroup.appendChild(labelRow);
+					axisGroup.appendChild(slider);
+					axisControlsWrap.appendChild(axisGroup);
+
+					axisVal.textContent = state.value.toFixed(0);
+
+					slider.addEventListener("input", function () {
+						state.value = parseFloat(slider.value);
+						axisVal.textContent = state.value.toFixed(0);
+						updateSpecimenTypography();
+					});
+				});
+
+				var axisGroupOuter = document.createElement("div");
+				axisGroupOuter.className = "control-group";
+
+				var axisLabel = document.createElement("div");
+				axisLabel.className = "control-label";
+				axisLabel.textContent = "Variable axes";
+
+				var chip = document.createElement("div");
+				chip.className = "chip";
+				var dot = document.createElement("span");
+				dot.className = "chip-dot";
+				var cText = document.createElement("span");
+				cText.textContent = "Variable font detected";
+				chip.appendChild(dot);
+				chip.appendChild(cText);
+
+				axisGroupOuter.appendChild(axisLabel);
+				axisGroupOuter.appendChild(chip);
+				axisGroupOuter.appendChild(axisControlsWrap);
+				controls.appendChild(axisGroupOuter);
+			}
+
+			wrapper.appendChild(controls);
+
+			// ---------- Main editable sample ----------
+
+			var sectionLabelMain = document.createElement("div");
+			sectionLabelMain.className = "section-label";
+			sectionLabelMain.textContent = "Editable specimen";
+
+			var sample = document.createElement("div");
+			sample.className = "sample-text";
+			sample.setAttribute("contenteditable", "true");
+			sample.textContent =
+				"The quick brown fox jumps over the lazy dog. 0123456789\n" +
+				"Pack my box with five dozen liquor jugs.\n" +
+				"Grids, rhythm and contrast shape clear typography.";
+
+			var caption = document.createElement("div");
+			caption.className = "sample-caption";
+			caption.textContent = "Click and edit this text to test the typeface.";
+
+			wrapper.appendChild(sectionLabelMain);
+			wrapper.appendChild(sample);
+			wrapper.appendChild(caption);
+
+			// ---------- Gyro-like "Hello Typeface!" section ----------
+
+			var hr1 = document.createElement("hr");
+			hr1.className = "section-rule";
+			wrapper.appendChild(hr1);
+
+			var sectionLabelGyro = document.createElement("div");
+			sectionLabelGyro.className = "section-label";
+			sectionLabelGyro.textContent = "Pointer / tilt interaction";
+			wrapper.appendChild(sectionLabelGyro);
+
+			var gyroBox = document.createElement("div");
+			gyroBox.className = "gyro-box";
+
+			var gyroText = document.createElement("div");
+			gyroText.className = "gyro-text";
+			gyroText.setAttribute("contenteditable", "true");
+			gyroText.textContent = "Hello Typeface!";
+
+			gyroBox.appendChild(gyroText);
+			wrapper.appendChild(gyroBox);
+
+			var gyroCaption = document.createElement("div");
+			gyroCaption.className = "gyro-caption";
+			gyroCaption.textContent =
+				"Move your pointer over the area (or tilt your device) to explore variation.";
+			wrapper.appendChild(gyroCaption);
+
+			// ---------- Fixed hierarchy specimens ----------
+
+			var hr2 = document.createElement("hr");
+			hr2.className = "section-rule";
+			wrapper.appendChild(hr2);
+
+			var sectionLabelHierarchy = document.createElement("div");
+			sectionLabelHierarchy.className = "section-label";
+			sectionLabelHierarchy.textContent = "Word / sentence / paragraph";
+			wrapper.appendChild(sectionLabelHierarchy);
+
+			var hierarchy = document.createElement("div");
+			hierarchy.className = "hierarchy-grid";
+
+			// Word
+			var wordContainer = document.createElement("div");
+			var wordLabel = document.createElement("div");
+			wordLabel.className = "block-label";
+			wordLabel.textContent = "Word – large";
+			var wordBlock = document.createElement("div");
+			wordBlock.className = "block-specimen word-specimen";
+			wordBlock.textContent = "Syntax";
+			wordContainer.appendChild(wordLabel);
+			wordContainer.appendChild(wordBlock);
+
+			// Sentence
+			var sentenceContainer = document.createElement("div");
+			var sentenceLabel = document.createElement("div");
+			sentenceLabel.className = "block-label";
+			sentenceLabel.textContent = "Short sentence – medium";
+			var sentenceBlock = document.createElement("div");
+			sentenceBlock.className = "block-specimen sentence-specimen";
+			sentenceBlock.textContent = "Grids reveal structure and rhythm in the layout.";
+			sentenceContainer.appendChild(sentenceLabel);
+			sentenceContainer.appendChild(sentenceBlock);
+
+			// Paragraph
+			var paragraphContainer = document.createElement("div");
+			var paragraphLabel = document.createElement("div");
+			paragraphLabel.className = "block-label";
+			paragraphLabel.textContent = "Long text – small";
+			var paragraphBlock = document.createElement("div");
+			paragraphBlock.className = "block-specimen paragraph-specimen";
+			paragraphBlock.textContent =
+				"Good typography balances hierarchy, contrast and spacing. " +
+				"Consistent grids allow content to breathe while keeping information precise and readable.";
+			paragraphContainer.appendChild(paragraphLabel);
+			paragraphContainer.appendChild(paragraphBlock);
+
+			hierarchy.appendChild(wordContainer);
+			hierarchy.appendChild(sentenceContainer);
+			hierarchy.appendChild(paragraphContainer);
+
+			wrapper.appendChild(hierarchy);
+
+			// ---------- Typography updater ----------
+
+			function updateSpecimenTypography() {
+				var baseSize = parseInt(sizeSlider.value, 10);
+				sizeValue.textContent = baseSize + " px";
+
+				var variationSettings = "normal";
+				if (axisStates.length) {
+					variationSettings = buildVariationSettings(axisStates);
+				}
+
+				// main sample
+				sample.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
+				sample.style.fontSize = baseSize + "px";
+				sample.style.fontVariationSettings = variationSettings;
+
+				// Hello (base state – gyro will override some properties)
+				gyroText.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
+				gyroText.style.fontSize = Math.round(baseSize * 1.1) + "px";
+				if (!axisStates.length) {
+					gyroText.style.fontVariationSettings = "normal";
+				} else {
+					gyroText.style.fontVariationSettings = variationSettings;
+				}
+
+				// hierarchy
+				wordBlock.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
+				wordBlock.style.fontSize = Math.round(baseSize * 1.2) + "px";
+				wordBlock.style.fontVariationSettings = variationSettings;
+
+				sentenceBlock.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
+				sentenceBlock.style.fontSize = Math.round(baseSize * 0.75) + "px";
+				sentenceBlock.style.fontVariationSettings = variationSettings;
+
+				paragraphBlock.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
+				paragraphBlock.style.fontSize = Math.round(baseSize * 0.5) + "px";
+				paragraphBlock.style.fontVariationSettings = variationSettings;
+			}
+
+			sizeSlider.addEventListener("input", updateSpecimenTypography);
+			updateSpecimenTypography();
+
+			// ---------- Gyro-like interaction ----------
+
+			function applyVariableToGyroFromPointer(xRatio, yRatio) {
+				if (!axisStates.length) return;
+
+				var settings = axisStates.map(function (axisState, index) {
+					var t = (index % 2 === 0) ? xRatio : yRatio;
+					var value = axisState.min + (axisState.max - axisState.min) * t;
+					return "'" + axisState.tag + "' " + value.toFixed(1);
+				}).join(", ");
+
+				gyroText.style.fontVariationSettings = settings;
+			}
+
+			function applyStaticToGyroFromPointer(xRatio, yRatio) {
+				// x: weight, y: tracking & slight shear
+				var weight = 100 + Math.round(xRatio * 800);
+				var letterSpacing = -0.04 + yRatio * 0.18; // em
+				var rotate = (xRatio - 0.5) * 4; // degrees
+
+				gyroText.style.fontWeight = weight;
+				gyroText.style.letterSpacing = letterSpacing.toFixed(3) + "em";
+				gyroText.style.transform = "skewX(" + rotate.toFixed(2) + "deg)";
+			}
+
+			function resetGyroVisual() {
+				if (axisStates.length) {
+					var baseSettings = buildVariationSettings(axisStates);
+					gyroText.style.fontVariationSettings = baseSettings;
+				} else {
+					gyroText.style.fontWeight = "400";
+					gyroText.style.letterSpacing = "0em";
+					gyroText.style.transform = "none";
+				}
+			}
+
+			gyroBox.addEventListener("pointermove", function (ev) {
+				var rect = gyroBox.getBoundingClientRect();
+				var xRatio = clamp01((ev.clientX - rect.left) / rect.width);
+				var yRatio = clamp01((ev.clientY - rect.top) / rect.height);
+
+				if (axisStates.length) {
+					applyVariableToGyroFromPointer(xRatio, yRatio);
+				} else {
+					applyStaticToGyroFromPointer(xRatio, yRatio);
+				}
+			});
+
+			gyroBox.addEventListener("pointerleave", function () {
+				resetGyroVisual();
+			});
+
+			// Optional: device tilt support (simple mapping)
+			if (window.DeviceOrientationEvent) {
+				window.addEventListener("deviceorientation", function (event) {
+					// gamma: left-right tilt, beta: front-back tilt
+					var gamma = event.gamma || 0; // -90 to 90
+					var beta = event.beta || 0;   // -180 to 180
+
+					var xRatio = clamp01((gamma + 45) / 90);
+					var yRatio = clamp01((beta + 45) / 90);
+
+					if (axisStates.length) {
+						applyVariableToGyroFromPointer(xRatio, yRatio);
+					} else {
+						applyStaticToGyroFromPointer(xRatio, yRatio);
+					}
+				});
+			}
+
+			// Initial neutral gyro state
+			resetGyroVisual();
+
+			// Finally attach the whole specimen
+			specimenContainer.appendChild(wrapper);
+		}
+	</script>
+</body>
+</html>
