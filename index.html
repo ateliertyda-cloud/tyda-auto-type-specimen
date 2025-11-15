@@ -355,9 +355,10 @@
 		/* === Gyro-like section: Hello Typeface! === */
 
 		.gyro-box {
-			border: 1px solid var(--ink);
-			background: #f9f9f9;
-			padding: 16px 14px;
+			/* 枠線 & 背景を削除 */
+			border: none;
+			background: transparent;
+			padding: 16px 0;
 			position: relative;
 			overflow: hidden;
 			cursor: pointer;
@@ -379,8 +380,10 @@
 			min-height: 2.4em;
 			display: flex;
 			align-items: center;
-			justify-content: flex-start;
+			justify-content: center; /* 中央揃え */
 			cursor: text;
+			text-align: center;
+			width: 100%;
 		}
 
 		.gyro-caption {
@@ -405,21 +408,22 @@
 		}
 
 		.block-specimen {
-			border: 1px solid var(--rule);
-			padding: 10px 10px 12px;
-			background: #fcfcfc;
-			min-height: 80px;
+			/* 枠線 & 背景を削除 */
+			border: none;
+			padding: 4px 0 0;
+			background: transparent;
+			min-height: 0;
 			display: flex;
 			align-items: flex-end;
 		}
 
 		.word-specimen {
-			font-size: 44px;
+			font-size: 72px; /* もっとデカく */
 			line-height: 1;
 		}
 
 		.sentence-specimen {
-			font-size: 24px;
+			font-size: 26px;
 			line-height: 1.2;
 		}
 
@@ -454,8 +458,8 @@
 				<div class="meta-label">Instructions</div>
 				<ul style="margin: 0; padding-left: 1.1em; list-style: square; font-size: 11px;">
 					<li>Drop <strong>.otf / .ttf / .woff / .woff2</strong> files into the panel.</li>
-					<li>Edit the main sample to test paragraphs, headlines and symbols.</li>
-					<li>Move your pointer over <strong>Hello Typeface!</strong> to explore variable axes or weight changes.</li>
+					<li>Edit the main specimen to test paragraphs, headlines and symbols.</li>
+					<li>Move your pointer over <strong>Hello Typeface!</strong> to explore variation.</li>
 				</ul>
 			</div>
 		</header>
@@ -697,13 +701,13 @@
 			var controls = document.createElement("div");
 			controls.className = "controls";
 
-			// Font size
+			// Font size (Editable specimen only)
 			var sizeGroup = document.createElement("div");
 			sizeGroup.className = "control-group";
 
 			var sizeLabel = document.createElement("div");
 			sizeLabel.className = "control-label";
-			sizeLabel.textContent = "Font size";
+			sizeLabel.textContent = "Font size (Editable specimen)";
 
 			var sizeSlider = document.createElement("input");
 			sizeSlider.type = "range";
@@ -722,20 +726,29 @@
 
 			// Variable axes
 			var fvar = font.tables && font.tables.fvar;
-			var axisStates = [];
+			var axisStates = [];      // for Editable specimen
+			var gyroAxesMeta = [];    // for Hello Typeface! (pointer / tilt)
 			var axisControlsWrap = document.createElement("div");
 			axisControlsWrap.className = "axis-controls";
 
 			if (fvar && Array.isArray(fvar.axes) && fvar.axes.length) {
 				fvar.axes.forEach(function (axis) {
+					// for Editable specimen
 					var state = {
 						tag: axis.tag,
 						min: axis.minValue,
 						max: axis.maxValue,
-						defaultValue: axis.defaultValue,
 						value: axis.defaultValue
 					};
 					axisStates.push(state);
+
+					// for gyro interaction (meta only)
+					gyroAxesMeta.push({
+						tag: axis.tag,
+						min: axis.minValue,
+						max: axis.maxValue,
+						defaultValue: axis.defaultValue
+					});
 
 					var axisGroup = document.createElement("div");
 					axisGroup.className = "axis-group";
@@ -771,7 +784,7 @@
 					slider.addEventListener("input", function () {
 						state.value = parseFloat(slider.value);
 						axisVal.textContent = state.value.toFixed(0);
-						updateSpecimenTypography();
+						updateEditableSpecimen();
 					});
 				});
 
@@ -780,7 +793,7 @@
 
 				var axisLabel = document.createElement("div");
 				axisLabel.className = "control-label";
-				axisLabel.textContent = "Variable axes";
+				axisLabel.textContent = "Variable axes (Editable specimen)";
 
 				var chip = document.createElement("div");
 				chip.className = "chip";
@@ -863,18 +876,18 @@
 			var hierarchy = document.createElement("div");
 			hierarchy.className = "hierarchy-grid";
 
-			// Word
+			// Word – large
 			var wordContainer = document.createElement("div");
 			var wordLabel = document.createElement("div");
 			wordLabel.className = "block-label";
 			wordLabel.textContent = "Word – large";
 			var wordBlock = document.createElement("div");
 			wordBlock.className = "block-specimen word-specimen";
-			wordBlock.textContent = "Syntax";
+			wordBlock.textContent = "Typography"; // より長くて大きい単語に変更
 			wordContainer.appendChild(wordLabel);
 			wordContainer.appendChild(wordBlock);
 
-			// Sentence
+			// Sentence – medium
 			var sentenceContainer = document.createElement("div");
 			var sentenceLabel = document.createElement("div");
 			sentenceLabel.className = "block-label";
@@ -885,7 +898,7 @@
 			sentenceContainer.appendChild(sentenceLabel);
 			sentenceContainer.appendChild(sentenceBlock);
 
-			// Paragraph
+			// Paragraph – small
 			var paragraphContainer = document.createElement("div");
 			var paragraphLabel = document.createElement("div");
 			paragraphLabel.className = "block-label";
@@ -904,9 +917,10 @@
 
 			wrapper.appendChild(hierarchy);
 
-			// ---------- Typography updater ----------
+			// ---------- Typography setup ----------
 
-			function updateSpecimenTypography() {
+			// Editable specimen only reacts to sliders
+			function updateEditableSpecimen() {
 				var baseSize = parseInt(sizeSlider.value, 10);
 				sizeValue.textContent = baseSize + " px";
 
@@ -915,46 +929,44 @@
 					variationSettings = buildVariationSettings(axisStates);
 				}
 
-				// main sample
 				sample.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
 				sample.style.fontSize = baseSize + "px";
 				sample.style.fontVariationSettings = variationSettings;
-
-				// Hello (base state – gyro will override some properties)
-				gyroText.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
-				gyroText.style.fontSize = Math.round(baseSize * 1.1) + "px";
-				if (!axisStates.length) {
-					gyroText.style.fontVariationSettings = "normal";
-				} else {
-					gyroText.style.fontVariationSettings = variationSettings;
-				}
-
-				// hierarchy
-				wordBlock.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
-				wordBlock.style.fontSize = Math.round(baseSize * 1.2) + "px";
-				wordBlock.style.fontVariationSettings = variationSettings;
-
-				sentenceBlock.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
-				sentenceBlock.style.fontSize = Math.round(baseSize * 0.75) + "px";
-				sentenceBlock.style.fontVariationSettings = variationSettings;
-
-				paragraphBlock.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
-				paragraphBlock.style.fontSize = Math.round(baseSize * 0.5) + "px";
-				paragraphBlock.style.fontVariationSettings = variationSettings;
 			}
 
-			sizeSlider.addEventListener("input", updateSpecimenTypography);
-			updateSpecimenTypography();
+			sizeSlider.addEventListener("input", updateEditableSpecimen);
+			updateEditableSpecimen();
+
+			// Other specimens: fixed sizes / default variation (スライダーの影響は受けない)
+			gyroText.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
+			gyroText.style.fontSize = "48px";
+
+			wordBlock.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
+			sentenceBlock.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
+			paragraphBlock.style.fontFamily = '"' + cssFamilyName + '", system-ui, sans-serif';
+
+			if (axisStates.length) {
+				var baseSettings = buildVariationSettings(axisStates);
+				gyroText.style.fontVariationSettings = baseSettings;
+				wordBlock.style.fontVariationSettings = baseSettings;
+				sentenceBlock.style.fontVariationSettings = baseSettings;
+				paragraphBlock.style.fontVariationSettings = baseSettings;
+			} else {
+				gyroText.style.fontVariationSettings = "normal";
+				wordBlock.style.fontVariationSettings = "normal";
+				sentenceBlock.style.fontVariationSettings = "normal";
+				paragraphBlock.style.fontVariationSettings = "normal";
+			}
 
 			// ---------- Gyro-like interaction ----------
 
 			function applyVariableToGyroFromPointer(xRatio, yRatio) {
-				if (!axisStates.length) return;
+				if (!gyroAxesMeta.length) return;
 
-				var settings = axisStates.map(function (axisState, index) {
+				var settings = gyroAxesMeta.map(function (axisMeta, index) {
 					var t = (index % 2 === 0) ? xRatio : yRatio;
-					var value = axisState.min + (axisState.max - axisState.min) * t;
-					return "'" + axisState.tag + "' " + value.toFixed(1);
+					var value = axisMeta.min + (axisMeta.max - axisMeta.min) * t;
+					return "'" + axisMeta.tag + "' " + value.toFixed(1);
 				}).join(", ");
 
 				gyroText.style.fontVariationSettings = settings;
@@ -972,9 +984,13 @@
 			}
 
 			function resetGyroVisual() {
-				if (axisStates.length) {
-					var baseSettings = buildVariationSettings(axisStates);
-					gyroText.style.fontVariationSettings = baseSettings;
+				if (gyroAxesMeta.length) {
+					var settings = gyroAxesMeta.map(function (axisMeta) {
+						return "'" + axisMeta.tag + "' " + axisMeta.defaultValue.toFixed(1);
+					}).join(", ");
+					gyroText.style.fontVariationSettings = settings;
+					gyroText.style.transform = "none";
+					gyroText.style.letterSpacing = "0em";
 				} else {
 					gyroText.style.fontWeight = "400";
 					gyroText.style.letterSpacing = "0em";
@@ -987,7 +1003,7 @@
 				var xRatio = clamp01((ev.clientX - rect.left) / rect.width);
 				var yRatio = clamp01((ev.clientY - rect.top) / rect.height);
 
-				if (axisStates.length) {
+				if (gyroAxesMeta.length) {
 					applyVariableToGyroFromPointer(xRatio, yRatio);
 				} else {
 					applyStaticToGyroFromPointer(xRatio, yRatio);
@@ -998,17 +1014,16 @@
 				resetGyroVisual();
 			});
 
-			// Optional: device tilt support (simple mapping)
+			// Optional: device tilt support
 			if (window.DeviceOrientationEvent) {
 				window.addEventListener("deviceorientation", function (event) {
-					// gamma: left-right tilt, beta: front-back tilt
 					var gamma = event.gamma || 0; // -90 to 90
 					var beta = event.beta || 0;   // -180 to 180
 
 					var xRatio = clamp01((gamma + 45) / 90);
 					var yRatio = clamp01((beta + 45) / 90);
 
-					if (axisStates.length) {
+					if (gyroAxesMeta.length) {
 						applyVariableToGyroFromPointer(xRatio, yRatio);
 					} else {
 						applyStaticToGyroFromPointer(xRatio, yRatio);
@@ -1016,7 +1031,7 @@
 				});
 			}
 
-			// Initial neutral gyro state
+			// Initial neutral state
 			resetGyroVisual();
 
 			// Finally attach the whole specimen
